@@ -14,7 +14,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
 
   return (
     <div className="flex flex-col gap-12">
-      <FadeIn direction="down" duration={0.8}>
+      <FadeIn direction="up" duration={0.8} delay={0.1}>
         <section className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-[var(--color-background-surface)] to-[var(--color-background-base)] px-4 py-24 text-center border border-[var(--color-border-subtle)]">
           <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-5" />
           <div className="relative z-10 flex max-w-3xl flex-col items-center gap-6">
@@ -110,32 +110,34 @@ async function ProjectList({ query }: { query: string }) {
 
 function ProjectGridSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div
-          key={i}
-          className="flex h-[240px] animate-pulse flex-col justify-between rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5"
-        >
-          <div>
-            <div className="mb-4 flex items-start gap-4">
-              <div className="h-16 w-16 rounded-lg bg-[var(--color-border-subtle)]" />
-              <div className="flex-1 space-y-3">
-                <div className="h-5 w-3/4 rounded-md bg-[var(--color-border-subtle)]" />
-                <div className="h-3 w-1/2 rounded-md bg-[var(--color-border-subtle)]" />
+    <FadeIn direction="up" delay={0.2}>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex h-[240px] animate-pulse flex-col justify-between rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5"
+          >
+            <div>
+              <div className="mb-4 flex items-start gap-4">
+                <div className="h-16 w-16 rounded-lg bg-[var(--color-border-subtle)]" />
+                <div className="flex-1 space-y-3">
+                  <div className="h-5 w-3/4 rounded-md bg-[var(--color-border-subtle)]" />
+                  <div className="h-3 w-1/2 rounded-md bg-[var(--color-border-subtle)]" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 w-full rounded-md bg-[var(--color-border-subtle)]" />
+                <div className="h-3 w-5/6 rounded-md bg-[var(--color-border-subtle)]" />
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="h-3 w-full rounded-md bg-[var(--color-border-subtle)]" />
-              <div className="h-3 w-5/6 rounded-md bg-[var(--color-border-subtle)]" />
+            <div className="mt-6 flex justify-between gap-2 border-t border-[var(--color-border-subtle)] pt-4">
+              <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
+              <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
+              <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
             </div>
           </div>
-          <div className="mt-6 flex justify-between gap-2 border-t border-[var(--color-border-subtle)] pt-4">
-            <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
-            <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
-            <div className="h-4 w-12 rounded-md bg-[var(--color-border-subtle)]" />
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </FadeIn>
   );
 }

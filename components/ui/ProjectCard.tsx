@@ -26,7 +26,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         y: -4,
         transition: { type: "spring", stiffness: 400, damping: 25 } // Spring feels responsive and soft
       }}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5 transition-all duration-300 hover:border-[var(--color-brand)] hover:shadow-[0_8px_30px_rgba(0,175,92,0.12)] h-full min-h-[260px]"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5 transition-colors transition-shadow duration-300 hover:border-[var(--color-brand)] hover:shadow-[0_8px_30px_rgba(0,175,92,0.12)] h-full min-h-[260px]"
     >
       <Link href={`/project/${project.slug}`} className="absolute inset-0 z-10">
         <span className="sr-only">View project {project.title}</span>
