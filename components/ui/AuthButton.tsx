@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LogIn, LogOut, Github, User as UserIcon } from 'lucide-react';
+import { LogOut, Github, User as UserIcon } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
 
 export function AuthButton() {
@@ -27,13 +27,8 @@ export function AuthButton() {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
-  const handleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    });
+  const handleSignIn = () => {
+    router.push("/login");
   };
 
   const handleSignOut = async () => {
