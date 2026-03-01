@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AuthButton } from "./AuthButton";
 import { Search, Hexagon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -28,6 +29,7 @@ export function Navbar() {
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-4 md:gap-6">
+          <AuthButton />
           <form
             onSubmit={handleSearch}
             className="relative hidden w-full max-w-sm sm:block"

@@ -1,12 +1,10 @@
 import { Metadata } from "next";
 import { getProject } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
-import { MarkdownRenderer } from "@/components/wiki/MarkdownRenderer";
 import { Sidebar } from "@/components/wiki/Sidebar";
-import { Gallery } from "@/components/wiki/Gallery";
 import { Download, Users, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
+import { ProjectTabs } from "@/components/wiki/ProjectTabs";
 
 type Params = Promise<{ slug: string }>;
 
@@ -25,7 +23,7 @@ export async function generateMetadata(
         images: project.icon_url ? [project.icon_url] : [],
       },
     };
-  } catch (e) {
+  } catch {
     return {
       title: "Project Not Found",
     };
@@ -42,7 +40,7 @@ export default async function ProjectPage(props: { params: Params }) {
     if (project.slug && project.slug !== params.slug) {
       redirect(`/project/${project.slug}`);
     }
-  } catch (error) {
+  } catch {
     notFound();
   }
 
@@ -84,7 +82,7 @@ export default async function ProjectPage(props: { params: Params }) {
             <div className="flex flex-wrap items-center gap-6 pt-2">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
                 <span className="text-[var(--color-text-muted)]">by</span>
-                <span className="hover:text-[var(--color-brand)] transition-colors cursor-pointer">{project.organization || "Unknown Author"}</span>
+                <span className="hover:text-[var(--color-brand)] transition-colors cursor-pointer">{project.organization || project.team || "Unknown Author"}</span>
               </div>
 
               <div className="h-1 w-1 rounded-full bg-[var(--color-border-subtle)] hidden sm:block" />
@@ -107,21 +105,7 @@ export default async function ProjectPage(props: { params: Params }) {
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         <div className="flex-1 min-w-0 order-2 lg:order-1">
-          <div className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-6 md:p-10 shadow-xl overflow-hidden mb-12">
-            {project.body ? (
-              <Suspense fallback={<div className="h-96 animate-pulse bg-[var(--color-background-surface)] rounded-xl" />}>
-                 <MarkdownRenderer content={project.body} />
-              </Suspense>
-            ) : (
-              <div className="text-center py-20 text-[var(--color-text-muted)]">
-                No description provided for this project.
-              </div>
-            )}
-          </div>
-
-          {project.gallery && project.gallery.length > 0 && (
-            <Gallery gallery={project.gallery} />
-          )}
+          <ProjectTabs project={project} />
         </div>
 
         <div className="order-1 lg:order-2 w-full lg:w-80 shrink-0">
