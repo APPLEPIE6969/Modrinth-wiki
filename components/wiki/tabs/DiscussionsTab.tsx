@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "@/types/modrinth";
+import { Project, Discussion } from "@/types/modrinth";
 import { MessageSquare, User, Calendar, PlusCircle, CheckCircle, CircleDot } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -13,7 +13,7 @@ interface DiscussionsTabProps {
 
 export function DiscussionsTab({ project }: DiscussionsTabProps) {
   const [session, setSession] = useState<unknown>(null);
-  const [discussions, setDiscussions] = useState<unknown[]>([]);
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const supabase = createClient();

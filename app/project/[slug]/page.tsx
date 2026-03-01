@@ -1,3 +1,4 @@
+import { TeamMember } from "@/types/modrinth";
 import { Metadata } from "next";
 import { getProject, getProjectTeamMembers } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
@@ -33,7 +34,7 @@ export async function generateMetadata(
 export default async function ProjectPage(props: { params: Params }) {
   const params = await props.params;
   let project;
-  let teamMembers = [];
+  let teamMembers: TeamMember[] = [];
 
   try {
     project = await getProject(params.slug);

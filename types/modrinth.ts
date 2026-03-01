@@ -98,3 +98,34 @@ export interface TeamMember {
   payouts_split: number | null;
   ordering: number;
 }
+
+export interface WikiPost {
+  id: string;
+  project_slug: string;
+  user_id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  profiles: {
+    username: string;
+    full_name: string;
+    avatar_url: string;
+  };
+}
+
+export interface Discussion {
+  id: string;
+  project_slug: string;
+  user_id: string;
+  title: string;
+  content: string;
+  status: 'open' | 'closed' | 'resolved';
+  created_at: string;
+  updated_at: string;
+  profiles: {
+    username: string;
+    full_name: string;
+    avatar_url: string;
+  };
+}

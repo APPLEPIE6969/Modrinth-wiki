@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "@/types/modrinth";
+import { Project, WikiPost } from "@/types/modrinth";
 import { BookOpen, User, Calendar, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -13,7 +13,7 @@ interface CommunityWikiTabProps {
 
 export function CommunityWikiTab({ project }: CommunityWikiTabProps) {
   const [session, setSession] = useState<unknown>(null);
-  const [posts, setPosts] = useState<unknown[]>([]);
+  const [posts, setPosts] = useState<WikiPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
   const supabase = createClient();
