@@ -7,7 +7,7 @@ export function Footer() {
       <div className="container mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center gap-2 md:items-start">
           <Link href="/" className="flex items-center gap-2">
-            <Hexagon className="h-6 w-6 text-[var(--color-text-muted)]" />
+            <img src="/logo.png" alt="Modrinth Wiki Logo" className="h-6 w-auto opacity-50 grayscale" />
             <span className="text-lg font-bold tracking-tight text-[var(--color-text-secondary)]">
               Modrinth<span className="text-[var(--color-text-muted)]">Wiki</span>
             </span>

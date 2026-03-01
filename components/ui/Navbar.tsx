@@ -22,7 +22,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-[var(--color-border-subtle)] bg-[var(--color-background-base)]/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Hexagon className="h-8 w-8 text-[var(--color-brand)]" fill="currentColor" strokeWidth={1} />
+          <img src="/logo.png" alt="Modrinth Wiki Logo" className="h-9 w-auto drop-shadow-md" />
           <span className="text-xl font-bold tracking-tight text-white">
             Modrinth<span className="text-[var(--color-brand)]">Wiki</span>
           </span>

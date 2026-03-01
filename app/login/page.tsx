@@ -31,7 +31,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] shadow-2xl">
           <div className="flex flex-col items-center border-b border-[var(--color-border-subtle)] p-8 text-center bg-[var(--color-background-surface)]">
             <Link href="/" className="mb-6 flex items-center justify-center rounded-full bg-[var(--color-background-base)] p-4 shadow-inner border border-[var(--color-border-subtle)]">
-              <Hexagon className="h-12 w-12 text-[var(--color-brand)]" fill="currentColor" strokeWidth={1} />
+              <img src="/logo.png" alt="Modrinth Wiki Logo" className="h-16 w-auto drop-shadow-lg" />
             </Link>
             <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
             <p className="text-sm text-[var(--color-text-secondary)]">
