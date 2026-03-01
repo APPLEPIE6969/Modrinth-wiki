@@ -1,7 +1,7 @@
 export interface Project {
   id: string;
   slug: string;
-  project_type: 'mod' | 'modpack' | 'resourcepack' | 'shader';
+  project_type: string;
   team: string;
   title: string;
   description: string;
@@ -56,7 +56,7 @@ export interface SearchResultProject {
   categories: string[];
   client_side: 'required' | 'optional' | 'unsupported';
   server_side: 'required' | 'optional' | 'unsupported';
-  project_type: 'mod' | 'modpack' | 'resourcepack' | 'shader';
+  project_type: string;
   downloads: number;
   icon_url: string | null;
   project_id: string;
