@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getProject } from "@/lib/api";
+import { getProject, getProjectTeamMembers } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
 import { Sidebar } from "@/components/wiki/Sidebar";
 import { Download, Users, ExternalLink } from "lucide-react";
@@ -33,6 +33,7 @@ export async function generateMetadata(
 export default async function ProjectPage(props: { params: Params }) {
   const params = await props.params;
   let project;
+  let teamMembers = [];
 
   try {
     project = await getProject(params.slug);
@@ -40,11 +41,19 @@ export default async function ProjectPage(props: { params: Params }) {
     if (project.slug && project.slug !== params.slug) {
       redirect(`/project/${project.slug}`);
     }
+
+    if (project.team) {
+      teamMembers = await getProjectTeamMembers(project.team);
+    }
   } catch {
     notFound();
   }
 
   const numberFormatter = new Intl.NumberFormat("en-US", { notation: "compact" });
+
+  const primaryAuthor = teamMembers.length > 0
+    ? teamMembers[0].user.name || teamMembers[0].user.username
+    : project.organization || "Unknown Author";
 
   return (
     <div className="flex flex-col gap-10 pb-20">
@@ -82,7 +91,12 @@ export default async function ProjectPage(props: { params: Params }) {
             <div className="flex flex-wrap items-center gap-6 pt-2">
               <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
                 <span className="text-[var(--color-text-muted)]">by</span>
-                <span className="hover:text-[var(--color-brand)] transition-colors cursor-pointer">{project.organization || project.team || "Unknown Author"}</span>
+                <span className="hover:text-[var(--color-brand)] transition-colors cursor-pointer">{primaryAuthor}</span>
+                {teamMembers.length > 1 && (
+                  <span className="text-[var(--color-text-muted)] text-xs ml-1 bg-[var(--color-background-surface)] px-2 py-0.5 rounded-full border border-[var(--color-border-subtle)]">
+                    + {teamMembers.length - 1} more
+                  </span>
+                )}
               </div>
 
               <div className="h-1 w-1 rounded-full bg-[var(--color-border-subtle)] hidden sm:block" />

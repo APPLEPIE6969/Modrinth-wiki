@@ -77,3 +77,24 @@ export interface SearchResponse {
   limit: number;
   total_hits: number;
 }
+
+export interface TeamMember {
+  team_id: string;
+  user: {
+    id: string;
+    github_id: number;
+    username: string;
+    name: string | null;
+    email: string | null;
+    avatar_url: string;
+    bio: string | null;
+    created: string;
+    role: string;
+    badges: number;
+  };
+  role: string;
+  permissions: number;
+  accepted: boolean;
+  payouts_split: number | null;
+  ordering: number;
+}

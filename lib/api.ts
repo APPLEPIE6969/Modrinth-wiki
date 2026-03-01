@@ -60,10 +60,21 @@ export async function searchProjects(
   return fetchLabrinth<SearchResponse>('/search', { params });
 }
 
+import { TeamMember } from "@/types/modrinth";
+
 export async function getProject(idOrSlug: string): Promise<Project> {
   return fetchLabrinth<Project>(`/project/${idOrSlug}`);
 }
 
 export async function getTrendingProjects(limit: number = 12): Promise<SearchResponse> {
   return searchProjects('', limit, 0, undefined);
+}
+
+export async function getProjectTeamMembers(teamId: string): Promise<TeamMember[]> {
+  try {
+    return await fetchLabrinth<TeamMember[]>(`/team/${teamId}/members`);
+  } catch (error) {
+    console.error(`Failed to fetch team members for team ${teamId}:`, error);
+    return [];
+  }
 }
