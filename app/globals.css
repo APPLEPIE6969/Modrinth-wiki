@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-brand: #00AF5C;
+  --color-brand-hover: #00964D;
+  --color-background-base: #111111;
+  --color-background-surface: #18181b;
+  --color-background-card: #27272a;
+
+  --color-text-primary: #f4f4f5;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+
+  --color-border-subtle: #3f3f46;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-background-base);
+    --foreground: var(--color-text-primary);
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+}
+
+/* Base configuration for prose in dark mode to match Modrinth */
+@layer components {
+  .prose {
+    --tw-prose-body: var(--color-text-primary);
+    --tw-prose-headings: #ffffff;
+    --tw-prose-links: var(--color-brand);
+    --tw-prose-bold: #ffffff;
+    --tw-prose-counters: var(--color-text-secondary);
+    --tw-prose-bullets: var(--color-text-secondary);
+    --tw-prose-hr: var(--color-border-subtle);
+    --tw-prose-quotes: var(--color-text-primary);
+    --tw-prose-quote-borders: var(--color-brand);
+    --tw-prose-captions: var(--color-text-secondary);
+    --tw-prose-code: #ffffff;
+    --tw-prose-pre-code: var(--color-text-primary);
+    --tw-prose-pre-bg: var(--color-background-card);
+    --tw-prose-th-borders: var(--color-border-subtle);
+    --tw-prose-td-borders: var(--color-border-subtle);
+  }
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-background-card);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-subtle);
+}
