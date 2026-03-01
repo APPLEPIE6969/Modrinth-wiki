@@ -14,11 +14,19 @@ interface ProjectCardProps {
 export function ProjectCard({ project, index }: ProjectCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      whileHover={{ scale: 1.02 }}
-      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5 transition-all hover:border-[var(--color-brand)] hover:shadow-[0_0_15px_rgba(0,175,92,0.15)] h-full min-h-[260px]"
+      transition={{
+        duration: 0.6,
+        delay: index * 0.08,
+        ease: [0.21, 0.47, 0.32, 0.98] // Smooth ease out cubic
+      }}
+      whileHover={{
+        scale: 1.02,
+        y: -4,
+        transition: { type: "spring", stiffness: 400, damping: 25 } // Spring feels responsive and soft
+      }}
+      className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-background-card)] p-5 transition-all duration-300 hover:border-[var(--color-brand)] hover:shadow-[0_8px_30px_rgba(0,175,92,0.12)] h-full min-h-[260px]"
     >
       <Link href={`/project/${project.slug}`} className="absolute inset-0 z-10">
         <span className="sr-only">View project {project.title}</span>
@@ -31,17 +39,17 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
               <img
                 src={project.icon_url}
                 alt={`${project.title} icon`}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--color-text-muted)] bg-[var(--color-border-subtle)]">
+              <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[var(--color-text-muted)] bg-[var(--color-border-subtle)] transition-transform duration-500 group-hover:scale-105">
                 {project.title.charAt(0)}
               </div>
             )}
           </div>
           <div className="flex-1 overflow-hidden">
-            <h3 className="truncate text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand)] transition-colors">
+            <h3 className="truncate text-lg font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-brand)] transition-colors duration-300">
               {project.title}
             </h3>
             <p className="text-sm text-[var(--color-text-secondary)]">
@@ -50,7 +58,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           </div>
         </div>
 
-        <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-[var(--color-text-muted)] group-hover:text-[var(--color-text-secondary)] transition-colors">
+        <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-[var(--color-text-muted)] group-hover:text-[var(--color-text-secondary)] transition-colors duration-300">
           {project.description}
         </p>
       </div>
@@ -64,12 +72,12 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
             {project.client_side !== "unsupported" && (
               <div className="flex items-center gap-1" title="Client-side">
-                <Monitor className={cn("h-4 w-4", project.client_side === "required" ? "text-[var(--color-brand)]" : "")} />
+                <Monitor className={cn("h-4 w-4 transition-colors duration-300", project.client_side === "required" ? "text-[var(--color-brand)]" : "")} />
               </div>
             )}
             {project.server_side !== "unsupported" && (
               <div className="flex items-center gap-1" title="Server-side">
-                <Server className={cn("h-4 w-4", project.server_side === "required" ? "text-[var(--color-brand)]" : "")} />
+                <Server className={cn("h-4 w-4 transition-colors duration-300", project.server_side === "required" ? "text-[var(--color-brand)]" : "")} />
               </div>
             )}
           </div>
@@ -79,13 +87,13 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           {project.categories.slice(0, 3).map((category) => (
             <span
               key={category}
-              className="inline-flex items-center rounded-md bg-[var(--color-background-surface)] px-2 py-1 text-[10px] font-medium text-[var(--color-text-secondary)] uppercase tracking-wider group-hover:bg-[var(--color-border-subtle)] transition-colors"
+              className="inline-flex items-center rounded-md bg-[var(--color-background-surface)] px-2 py-1 text-[10px] font-medium text-[var(--color-text-secondary)] uppercase tracking-wider group-hover:bg-[var(--color-border-subtle)] transition-colors duration-300"
             >
               {category}
             </span>
           ))}
           {project.categories.length > 3 && (
-            <span className="inline-flex items-center rounded-md bg-[var(--color-background-surface)] px-2 py-1 text-[10px] font-medium text-[var(--color-text-secondary)]">
+            <span className="inline-flex items-center rounded-md bg-[var(--color-background-surface)] px-2 py-1 text-[10px] font-medium text-[var(--color-text-secondary)] group-hover:bg-[var(--color-border-subtle)] transition-colors duration-300">
               +{project.categories.length - 3}
             </span>
           )}
