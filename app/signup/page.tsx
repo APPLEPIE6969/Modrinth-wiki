@@ -1,11 +1,10 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { Github, AlertCircle, Mail, Lock } from "lucide-react";
+import { Github, AlertCircle, Mail, Lock, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { FadeIn } from "@/components/ui/FadeIn";
-import { useRouter } from "next/navigation";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" className="h-4 w-4">
@@ -17,12 +16,13 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export default function LoginPage() {
+export default function SignUpPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [success, setSuccess] = useState(false);
   const supabase = createClient();
 
   const isMissingEnv = process.env.NEXT_PUBLIC_SUPABASE_URL === undefined || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("localhost:54321");
@@ -36,11 +36,11 @@ export default function LoginPage() {
     });
   };
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isMissingEnv) return;
 
-    if (!email || !password) {
+    if (!email || !password || !username) {
       setError("Please fill in all fields.");
       return;
     }
@@ -48,18 +48,24 @@ export default function LoginPage() {
     setLoading('email');
     setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          preferred_username: username,
+          full_name: username
+        },
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      }
     });
 
-    if (signInError) {
-      setError(signInError.message);
-      setLoading(null);
+    if (signUpError) {
+      setError(signUpError.message);
     } else {
-      router.push("/");
-      router.refresh();
+      setSuccess(true);
     }
+    setLoading(null);
   };
 
   return (
@@ -70,9 +76,9 @@ export default function LoginPage() {
             <Link href="/" className="mb-6 flex items-center justify-center rounded-full bg-[var(--color-background-base)] p-4 shadow-inner border border-[var(--color-border-subtle)] hover:scale-105 transition-transform">
               <img src="/logo.png" alt="Modrinth Wiki Logo" className="h-12 w-auto drop-shadow-lg" />
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Welcome Back</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Create an Account</h1>
             <p className="text-sm text-[var(--color-text-secondary)]">
-              Sign in to contribute to the Modrinth community wiki, post discussions, and vote on helpful guides.
+              Join the community to post guides and discuss your favorite mods.
             </p>
           </div>
 
@@ -90,15 +96,44 @@ export default function LoginPage() {
                 </div>
                 <Link href="/" className="mt-4 text-sm font-medium text-[var(--color-brand)]">Return to Home</Link>
               </div>
+            ) : success ? (
+              <div className="flex flex-col items-center gap-4 text-center py-4 mb-6">
+                <div className="rounded-full bg-[var(--color-brand)]/10 p-4">
+                  <Mail className="h-8 w-8 text-[var(--color-brand)]" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Check your email</h3>
+                  <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                    We sent a verification link to <span className="font-semibold text-white">{email}</span>. Please verify your email to continue.
+                  </p>
+                </div>
+                <Link href="/login" className="mt-6 flex items-center gap-2 text-sm font-medium text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] transition-colors">
+                  Return to login <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             ) : (
               <>
-                <form onSubmit={handleEmailSignIn} className="space-y-4 mb-6">
+                <form onSubmit={handleEmailSignUp} className="space-y-4 mb-6">
                   {error && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-md flex items-center gap-2 text-sm mb-4">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       {error}
                     </div>
                   )}
+
+                  <div>
+                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wider">Username</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-text-muted)]" />
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="jules_coder"
+                        className="w-full rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-background-surface)] py-2.5 pl-10 pr-4 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-border-subtle)] focus:border-[var(--color-brand)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)] transition-all"
+                      />
+                    </div>
+                  </div>
 
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 uppercase tracking-wider">Email Address</label>
@@ -133,7 +168,7 @@ export default function LoginPage() {
                     disabled={loading !== null}
                     className="flex w-full items-center justify-center gap-2 rounded-md bg-[var(--color-brand)] px-4 py-2.5 text-sm font-semibold text-[#111] hover:bg-[var(--color-brand-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:ring-offset-2 focus:ring-offset-[var(--color-background-card)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg shadow-[var(--color-brand)]/20"
                   >
-                    {loading === 'email' ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#111] border-t-transparent" /> : "Sign In"}
+                    {loading === 'email' ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#111] border-t-transparent" /> : "Create Account"}
                   </button>
                 </form>
 
@@ -166,9 +201,9 @@ export default function LoginPage() {
 
           <div className="border-t border-[var(--color-border-subtle)] bg-[var(--color-background-base)] p-5 text-center">
             <p className="text-sm text-[var(--color-text-secondary)]">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-semibold text-[var(--color-brand)] hover:underline underline-offset-4">
-                Sign up
+              Already have an account?{" "}
+              <Link href="/login" className="font-semibold text-[var(--color-brand)] hover:underline underline-offset-4">
+                Sign in
               </Link>
             </p>
           </div>
