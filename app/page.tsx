@@ -1,9 +1,10 @@
 import { Suspense } from "react";
-import { searchProjects } from "@/lib/api";
+import { searchProjects, getLoaders, getGameVersions } from "@/lib/api";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { Search } from "lucide-react";
 import { redirect } from "next/navigation";
-import { FadeIn } from "@/components/ui/FadeIn";
+import { FadeIn, FadeInStaggerGroup } from "@/components/ui/FadeIn";
+import { FilterPanel } from "@/components/ui/FilterPanel";
 
 // Define search params type properly for Next.js App Router
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -11,9 +12,18 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export default async function Home(props: { searchParams: SearchParams }) {
   const searchParams = await props.searchParams;
   const q = typeof searchParams.q === 'string' ? searchParams.q : '';
+  const sort = typeof searchParams.sort === 'string' ? searchParams.sort as 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated' : 'relevance';
+  const loader = typeof searchParams.loader === 'string' ? searchParams.loader : '';
+  const version = typeof searchParams.version === 'string' ? searchParams.version : '';
+
+  // Fetch filter options in parallel
+  const [loadersData, versionsData] = await Promise.all([
+    getLoaders(),
+    getGameVersions()
+  ]);
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-12 pb-20">
       <FadeIn direction="up" duration={0.8} delay={0.1}>
         <section className="relative flex flex-col items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-[var(--color-background-surface)] to-[var(--color-background-base)] px-4 py-24 text-center border border-[var(--color-border-subtle)]">
           <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-5" />
@@ -28,11 +38,13 @@ export default async function Home(props: { searchParams: SearchParams }) {
             <form action={async (formData) => {
               'use server';
               const query = formData.get('q');
-              if (query) {
-                redirect(`/?q=${encodeURIComponent(query.toString())}`);
-              } else {
-                redirect('/');
-              }
+              const params = new URLSearchParams();
+              if (query) params.set('q', query.toString());
+              if (sort !== 'relevance') params.set('sort', sort);
+              if (loader) params.set('loader', loader);
+              if (version) params.set('version', version);
+
+              redirect(`/?${params.toString()}`);
             }} className="w-full max-w-2xl mt-8">
               <div className="relative group">
                 <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-[var(--color-brand)] to-[#00ff84] opacity-30 blur group-hover:opacity-50 transition duration-500"></div>
@@ -58,13 +70,17 @@ export default async function Home(props: { searchParams: SearchParams }) {
         </section>
       </FadeIn>
 
-      <section>
+      <section className="flex flex-col gap-6">
         <FadeIn direction="none" delay={0.2} duration={0.8}>
-          <div className="flex items-center justify-between mb-8">
+          <FilterPanel loaders={loadersData} versions={versionsData} />
+        </FadeIn>
+
+        <FadeIn direction="none" delay={0.3} duration={0.8}>
+          <div className="flex items-center justify-between mt-2">
             <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
-              {q ? (
+              {q || loader || version || sort !== 'relevance' ? (
                 <>
-                  Search Results for <span className="text-[var(--color-brand)]">&quot;{q}&quot;</span>
+                  Search Results <span className="text-[var(--color-brand)] text-sm font-medium px-3 py-1 bg-[var(--color-brand)]/10 rounded-full border border-[var(--color-brand)]/20 ml-2">Filtered</span>
                 </>
               ) : (
                 <>
@@ -76,16 +92,26 @@ export default async function Home(props: { searchParams: SearchParams }) {
           </div>
         </FadeIn>
 
-        <Suspense fallback={<ProjectGridSkeleton />}>
-          <ProjectList query={q} />
+        {/* The key forces a full remount/re-suspense of the component when search params change */}
+        <Suspense key={`${q}-${sort}-${loader}-${version}`} fallback={<ProjectGridSkeleton />}>
+          <ProjectList query={q} sort={sort} loader={loader} version={version} />
         </Suspense>
       </section>
     </div>
   );
 }
 
-async function ProjectList({ query }: { query: string }) {
-  const data = await searchProjects(query, 24, 0);
+async function ProjectList({ query, sort, loader, version }: { query: string, sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated', loader: string, version: string }) {
+  const facets: string[][] = [];
+
+  if (loader) {
+    facets.push([`categories:${loader}`]);
+  }
+  if (version) {
+    facets.push([`versions:${version}`]);
+  }
+
+  const data = await searchProjects(query, 24, 0, facets.length > 0 ? facets : undefined, sort);
 
   if (!data.hits || data.hits.length === 0) {
     return (
@@ -100,11 +126,11 @@ async function ProjectList({ query }: { query: string }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <FadeInStaggerGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {data.hits.map((project, index) => (
         <ProjectCard key={project.project_id} project={project} index={index} />
       ))}
-    </div>
+    </FadeInStaggerGroup>
   );
 }
 

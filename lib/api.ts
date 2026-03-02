@@ -1,4 +1,4 @@
-import { Project, SearchResponse } from '@/types/modrinth';
+import { Project, SearchResponse, TeamMember } from '@/types/modrinth';
 
 const API_BASE_URL = 'https://api.modrinth.com/v2';
 const USER_AGENT = 'ModrinthWiki-App/1.0.0 (https://github.com/APPLEPIE6969/Modrinth-wiki)';
@@ -40,13 +40,15 @@ async function fetchLabrinth<T>(endpoint: string, options: FetchOptions = {}): P
 
 export async function searchProjects(
   query: string = '',
-  limit: number = 20,
+  limit: number = 24,
   offset: number = 0,
-  facets?: string[][]
+  facets?: string[][],
+  index: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated' = 'relevance'
 ): Promise<SearchResponse> {
   const params: Record<string, string> = {
     limit: limit.toString(),
     offset: offset.toString(),
+    index,
   };
 
   if (query) {
@@ -60,14 +62,8 @@ export async function searchProjects(
   return fetchLabrinth<SearchResponse>('/search', { params });
 }
 
-import { TeamMember } from "@/types/modrinth";
-
 export async function getProject(idOrSlug: string): Promise<Project> {
   return fetchLabrinth<Project>(`/project/${idOrSlug}`);
-}
-
-export async function getTrendingProjects(limit: number = 12): Promise<SearchResponse> {
-  return searchProjects('', limit, 0, undefined);
 }
 
 export async function getProjectTeamMembers(teamId: string): Promise<TeamMember[]> {
@@ -75,6 +71,28 @@ export async function getProjectTeamMembers(teamId: string): Promise<TeamMember[
     return await fetchLabrinth<TeamMember[]>(`/team/${teamId}/members`);
   } catch (error) {
     console.error(`Failed to fetch team members for team ${teamId}:`, error);
+    return [];
+  }
+}
+
+export async function getTrendingProjects(limit: number = 12): Promise<SearchResponse> {
+  return searchProjects('', limit, 0, undefined, 'relevance');
+}
+
+export async function getGameVersions(): Promise<{version: string, version_type: string, date: string, major: boolean}[]> {
+  try {
+    const data = await fetchLabrinth<{version: string, version_type: string, date: string, major: boolean}[]>('/tag/game_version');
+    // Filter to only show major release versions for cleaner UI
+    return data.filter(v => v.version_type === 'release').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } catch {
+    return [];
+  }
+}
+
+export async function getLoaders(): Promise<{icon: string, name: string, supported_project_types: string[]}[]> {
+  try {
+    return await fetchLabrinth<{icon: string, name: string, supported_project_types: string[]}[]>('/tag/loader');
+  } catch {
     return [];
   }
 }
