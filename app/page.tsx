@@ -1,10 +1,12 @@
 import { Suspense } from "react";
-import { searchProjects, getLoaders, getGameVersions } from "@/lib/api";
+import { searchProjects, getLoaders, getGameVersions, getTrendingProjects } from "@/lib/api";
 import { ProjectCard } from "@/components/ui/ProjectCard";
-import { Search } from "lucide-react";
+import { Search, AlertTriangle, RefreshCw } from "lucide-react";
 import { redirect } from "next/navigation";
 import { FadeIn, FadeInStaggerGroup } from "@/components/ui/FadeIn";
 import { FilterPanel } from "@/components/ui/FilterPanel";
+import { TrendingCarousel } from "@/components/ui/TrendingCarousel";
+import Link from "next/link";
 
 // Define search params type properly for Next.js App Router
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
@@ -16,11 +18,22 @@ export default async function Home(props: { searchParams: SearchParams }) {
   const loader = typeof searchParams.loader === 'string' ? searchParams.loader : '';
   const version = typeof searchParams.version === 'string' ? searchParams.version : '';
 
-  // Fetch filter options in parallel
-  const [loadersData, versionsData] = await Promise.all([
-    getLoaders(),
-    getGameVersions()
-  ]);
+  const isFiltering = q || loader || version || sort !== 'relevance';
+
+  // Fetch filter options in parallel with graceful fallbacks
+  let loadersData: { name: string }[] = [];
+  let versionsData: { version: string }[] = [];
+
+  try {
+    const [lData, vData] = await Promise.all([
+      getLoaders(),
+      getGameVersions()
+    ]);
+    loadersData = lData;
+    versionsData = vData;
+  } catch (error) {
+    console.error("Failed to load filter metadata", error);
+  }
 
   return (
     <div className="flex flex-col gap-12 pb-20">
@@ -70,6 +83,12 @@ export default async function Home(props: { searchParams: SearchParams }) {
         </section>
       </FadeIn>
 
+      {!isFiltering && (
+        <Suspense fallback={<div className="h-64 animate-pulse bg-[var(--color-background-surface)] rounded-2xl border border-[var(--color-border-subtle)] mb-12" />}>
+           <TrendingSection />
+        </Suspense>
+      )}
+
       <section className="flex flex-col gap-6">
         <FadeIn direction="none" delay={0.2} duration={0.8}>
           <FilterPanel loaders={loadersData} versions={versionsData} />
@@ -78,27 +97,35 @@ export default async function Home(props: { searchParams: SearchParams }) {
         <FadeIn direction="none" delay={0.3} duration={0.8}>
           <div className="flex items-center justify-between mt-2">
             <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
-              {q || loader || version || sort !== 'relevance' ? (
+              {isFiltering ? (
                 <>
                   Search Results <span className="text-[var(--color-brand)] text-sm font-medium px-3 py-1 bg-[var(--color-brand)]/10 rounded-full border border-[var(--color-brand)]/20 ml-2">Filtered</span>
                 </>
               ) : (
                 <>
                   <span className="h-8 w-2 rounded-full bg-[var(--color-brand)] block"></span>
-                  Trending Projects
+                  Explore All
                 </>
               )}
             </h2>
           </div>
         </FadeIn>
 
-        {/* The key forces a full remount/re-suspense of the component when search params change */}
         <Suspense key={`${q}-${sort}-${loader}-${version}`} fallback={<ProjectGridSkeleton />}>
           <ProjectList query={q} sort={sort} loader={loader} version={version} />
         </Suspense>
       </section>
     </div>
   );
+}
+
+async function TrendingSection() {
+  try {
+    const data = await getTrendingProjects(8);
+    return <TrendingCarousel projects={data.hits || []} />;
+  } catch {
+    return null;
+  }
 }
 
 async function ProjectList({ query, sort, loader, version }: { query: string, sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated', loader: string, version: string }) {
@@ -111,27 +138,46 @@ async function ProjectList({ query, sort, loader, version }: { query: string, so
     facets.push([`versions:${version}`]);
   }
 
-  const data = await searchProjects(query, 24, 0, facets.length > 0 ? facets : undefined, sort);
+  try {
+    const data = await searchProjects(query, 24, 0, facets.length > 0 ? facets : undefined, sort);
 
-  if (!data.hits || data.hits.length === 0) {
+    if (!data.hits || data.hits.length === 0) {
+      return (
+        <FadeIn direction="up" delay={0.4}>
+          <div className="flex flex-col items-center justify-center py-24 text-center border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-surface)]">
+            <Search className="h-16 w-16 text-[var(--color-text-muted)] mb-4" />
+            <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">No projects found</h3>
+            <p className="text-[var(--color-text-secondary)]">Try adjusting your search terms or filters.</p>
+          </div>
+        </FadeIn>
+      );
+    }
+
     return (
-      <FadeIn direction="up" delay={0.4}>
-        <div className="flex flex-col items-center justify-center py-24 text-center border border-[var(--color-border-subtle)] rounded-2xl bg-[var(--color-background-surface)]">
-          <Search className="h-16 w-16 text-[var(--color-text-muted)] mb-4" />
-          <h3 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">No projects found</h3>
-          <p className="text-[var(--color-text-secondary)]">Try adjusting your search terms or filters.</p>
+      <FadeInStaggerGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {data.hits.map((project, index) => (
+          <ProjectCard key={project.project_id} project={project} index={index} />
+        ))}
+      </FadeInStaggerGroup>
+    );
+  } catch (error) {
+    console.error("Modrinth API Search Error:", error);
+    return (
+      <FadeIn direction="up" delay={0.2}>
+        <div className="flex flex-col items-center justify-center py-24 text-center border border-red-500/20 rounded-2xl bg-red-500/5">
+          <AlertTriangle className="h-16 w-16 text-red-500 mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Modrinth API is currently unavailable</h3>
+          <p className="text-[var(--color-text-secondary)] max-w-md mb-6">
+            We are having trouble connecting to the official Modrinth API (504 Gateway Timeout). The server might be experiencing high load.
+          </p>
+          <Link href="/" className="flex items-center gap-2 rounded-lg bg-[var(--color-background-surface)] px-6 py-3 text-sm font-semibold text-white border border-[var(--color-border-subtle)] hover:bg-[var(--color-background-base)] transition-all">
+            <RefreshCw className="h-4 w-4" />
+            Clear Filters & Try Again
+          </Link>
         </div>
       </FadeIn>
     );
   }
-
-  return (
-    <FadeInStaggerGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {data.hits.map((project, index) => (
-        <ProjectCard key={project.project_id} project={project} index={index} />
-      ))}
-    </FadeInStaggerGroup>
-  );
 }
 
 function ProjectGridSkeleton() {

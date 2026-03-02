@@ -1,12 +1,14 @@
-import { TeamMember } from "@/types/modrinth";
 import { Metadata } from "next";
 import { getProject, getProjectTeamMembers } from "@/lib/api";
 import { notFound, redirect } from "next/navigation";
 import { Sidebar } from "@/components/wiki/Sidebar";
 import { Download, Users, ExternalLink } from "lucide-react";
+import { FavoriteButton } from "@/components/wiki/FavoriteButton";
+import { checkIsFavorited } from "@/lib/actions/favorites";
 import Link from "next/link";
 import { ProjectTabs } from "@/components/wiki/ProjectTabs";
 import { FadeIn } from "@/components/ui/FadeIn";
+import { TeamMember } from "@/types/modrinth";
 
 type Params = Promise<{ slug: string }>;
 
@@ -35,6 +37,7 @@ export async function generateMetadata(
 export default async function ProjectPage(props: { params: Params }) {
   const params = await props.params;
   let project;
+  let isFavorited = false;
   let teamMembers: TeamMember[] = [];
 
   try {
@@ -47,6 +50,8 @@ export default async function ProjectPage(props: { params: Params }) {
     if (project.team) {
       teamMembers = await getProjectTeamMembers(project.team);
     }
+
+    isFavorited = await checkIsFavorited(project.slug);
   } catch {
     notFound();
   }
@@ -76,22 +81,26 @@ export default async function ProjectPage(props: { params: Params }) {
               )}
             </div>
 
-            <div className="flex-1 space-y-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
-                    {project.title}
-                  </h1>
-                  <span className="inline-flex items-center rounded-full bg-[var(--color-brand)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)] border border-[var(--color-brand)]/20 shadow-[0_0_10px_rgba(0,175,92,0.1)]">
-                    {project.project_type}
-                  </span>
+            <div className="flex-1 w-full space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                      {project.title}
+                    </h1>
+                    <span className="inline-flex items-center rounded-full bg-[var(--color-brand)]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-brand)] border border-[var(--color-brand)]/20 shadow-[0_0_10px_rgba(0,175,92,0.1)]">
+                      {project.project_type}
+                    </span>
+                  </div>
+                  <p className="text-lg text-[var(--color-text-secondary)] md:text-xl font-medium max-w-3xl leading-relaxed">
+                    {project.description}
+                  </p>
                 </div>
-                <p className="text-lg text-[var(--color-text-secondary)] md:text-xl font-medium max-w-3xl leading-relaxed">
-                  {project.description}
-                </p>
+
+                <FavoriteButton projectSlug={project.slug} initialFavorited={isFavorited} />
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 pt-2">
+              <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-[var(--color-border-subtle)] sm:border-t-0 sm:pt-0">
                 <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary)]">
                   <span className="text-[var(--color-text-muted)]">by</span>
                   <span className="hover:text-[var(--color-brand)] transition-colors cursor-pointer">{primaryAuthor}</span>

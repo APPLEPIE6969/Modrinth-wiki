@@ -129,3 +129,22 @@ create policy "Authenticated users can upload images"
   on storage.objects for insert
   to authenticated
   with check ( bucket_id = 'wiki_images' );
+
+-- Create User Favorites table
+create table user_favorites (
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  project_slug text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  primary key (user_id, project_slug)
+);
+
+alter table user_favorites enable row level security;
+
+create policy "Users can view their own favorites." on user_favorites
+  for select using ((select auth.uid()) = user_id);
+
+create policy "Users can insert their own favorites." on user_favorites
+  for insert with check ((select auth.uid()) = user_id);
+
+create policy "Users can delete their own favorites." on user_favorites
+  for delete using ((select auth.uid()) = user_id);

@@ -21,6 +21,9 @@ async function fetchLabrinth<T>(endpoint: string, options: FetchOptions = {}): P
 
   const response = await fetch(url, {
     ...customOptions,
+    // Implement edge caching: cache responses for 1 hour by default to achieve <1s load times
+    // and prevent Gateway Timeouts from hammering the origin API.
+    next: { revalidate: 3600, ...customOptions.next },
     headers: {
       'User-Agent': USER_AGENT,
       'Content-Type': 'application/json',
@@ -32,7 +35,7 @@ async function fetchLabrinth<T>(endpoint: string, options: FetchOptions = {}): P
     if (response.status === 404) {
       throw new Error('Not Found');
     }
-    throw new Error(`Labrinth API error: ${response.statusText} for URL: ${url}`);
+    throw new Error(`Labrinth API error: ${response.status} ${response.statusText} for URL: ${url}`);
   }
 
   return response.json();
@@ -81,8 +84,8 @@ export async function getTrendingProjects(limit: number = 12): Promise<SearchRes
 
 export async function getGameVersions(): Promise<{version: string, version_type: string, date: string, major: boolean}[]> {
   try {
-    const data = await fetchLabrinth<{version: string, version_type: string, date: string, major: boolean}[]>('/tag/game_version');
-    // Filter to only show major release versions for cleaner UI
+    // Cache versions for 24 hours as they change rarely
+    const data = await fetchLabrinth<{version: string, version_type: string, date: string, major: boolean}[]>('/tag/game_version', { next: { revalidate: 86400 } });
     return data.filter(v => v.version_type === 'release').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch {
     return [];
@@ -91,7 +94,9 @@ export async function getGameVersions(): Promise<{version: string, version_type:
 
 export async function getLoaders(): Promise<{icon: string, name: string, supported_project_types: string[]}[]> {
   try {
-    return await fetchLabrinth<{icon: string, name: string, supported_project_types: string[]}[]>('/tag/loader');
+    // Cache loaders for 24 hours
+    const data = await fetchLabrinth<{icon: string, name: string, supported_project_types: string[]}[]>('/tag/loader', { next: { revalidate: 86400 } });
+    return data;
   } catch {
     return [];
   }
