@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from '@/lib/supabase/client';
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LogOut, Github, User as UserIcon } from 'lucide-react';
@@ -58,6 +59,10 @@ export function AuthButton() {
           {session.user.user_metadata?.preferred_username || session.user.email?.split('@')[0]}
         </span>
       </div>
+      <Link href="/dashboard" className="flex items-center gap-2 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-background-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-border-subtle)] hover:text-white transition-colors">
+         <UserIcon className="h-4 w-4" />
+         <span className="hidden sm:inline">Dashboard</span>
+      </Link>
       <button
         onClick={handleSignOut}
         className="flex items-center gap-2 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-background-surface)] px-3 py-1.5 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-border-subtle)] hover:text-white transition-colors"
