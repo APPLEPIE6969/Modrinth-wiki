@@ -3,7 +3,7 @@
 import { Project, WikiPost } from "@/types/modrinth";
 import { BookOpen, User, Calendar, PlusCircle } from "lucide-react";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { CreateWikiPost } from "./CreateWikiPost";
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
@@ -16,9 +16,16 @@ export function CommunityWikiTab({ project }: CommunityWikiTabProps) {
   const [posts, setPosts] = useState<WikiPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
-  const supabase = createClient();
+
+  const isConfigured = isSupabaseConfigured();
+  const supabase = isConfigured ? createClient() : null;
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -43,6 +50,7 @@ export function CommunityWikiTab({ project }: CommunityWikiTabProps) {
   }, [project.slug, supabase]);
 
   const handleSuccess = () => {
+    if (!supabase) return;
     setShowEditor(false);
     // Reload posts after a successful creation
     setLoading(true);
