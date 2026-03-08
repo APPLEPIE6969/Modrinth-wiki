@@ -25,7 +25,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...projects,
     ]
   } catch (error) {
-    console.error("Failed to generate sitemap", error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Failed to generate sitemap", error)
+    }
     return [
       {
         url: baseUrl,
