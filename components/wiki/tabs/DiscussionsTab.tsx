@@ -3,7 +3,7 @@
 import { Project, Discussion } from "@/types/modrinth";
 import { MessageSquare, User, Calendar, PlusCircle, CheckCircle, CircleDot } from "lucide-react";
 import { useState, useEffect } from "react";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { CreateDiscussion } from "./CreateDiscussion";
 import { MarkdownRenderer } from "../MarkdownRenderer";
 
@@ -16,16 +16,9 @@ export function DiscussionsTab({ project }: DiscussionsTabProps) {
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
-
-  const isConfigured = isSupabaseConfigured();
-  const supabase = isConfigured ? createClient() : null;
+  const supabase = createClient();
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -50,7 +43,6 @@ export function DiscussionsTab({ project }: DiscussionsTabProps) {
   }, [project.slug, supabase]);
 
   const handleSuccess = () => {
-    if (!supabase) return;
     setShowEditor(false);
     // Reload discussions after a successful creation
     setLoading(true);

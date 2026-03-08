@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { updateProfile } from "@/lib/actions/profile";
 import { Loader2, AlertCircle, Upload, CheckCircle2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,11 +17,22 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Use state instead of defaultValue to guarantee hydration matches and updates are tracked
+  const [username, setUsername] = useState(initialUsername);
+  const [fullName, setFullName] = useState(initialFullName);
+
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // Sync state if server props change
+  useEffect(() => {
+    setUsername(initialUsername);
+    setFullName(initialFullName);
+    setAvatarUrl(initialAvatarUrl);
+  }, [initialUsername, initialFullName, initialAvatarUrl]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,8 +56,14 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
     setError(null);
     setSuccess(false);
 
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("fullName", fullName);
     formData.append("currentAvatarUrl", avatarUrl);
+
+    if (fileInputRef.current?.files?.[0]) {
+      formData.append("avatar", fileInputRef.current.files[0]);
+    }
 
     try {
       const result = await updateProfile(formData);
@@ -57,6 +74,7 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
         setSuccess(true);
         if (result.avatarUrl) {
           setAvatarUrl(result.avatarUrl);
+          setAvatarPreview(null); // Clear preview to show live URL
         }
         router.refresh();
       }
@@ -138,7 +156,8 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
             id="username"
             name="username"
             type="text"
-            defaultValue={initialUsername}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-background-surface)] px-4 py-3 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-brand)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)] transition-all max-w-md"
             placeholder="jules_coder"
             required
@@ -152,7 +171,8 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
             id="fullName"
             name="fullName"
             type="text"
-            defaultValue={initialFullName}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
             className="w-full rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-background-surface)] px-4 py-3 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:border-[var(--color-brand)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)] transition-all max-w-md"
             placeholder="Jules"
           />

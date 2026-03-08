@@ -32,9 +32,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
     loadersData = lData;
     versionsData = vData;
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Failed to load filter metadata", error);
-    }
+    console.error("Failed to load filter metadata", error);
   }
 
   return (
@@ -163,9 +161,7 @@ async function ProjectList({ query, sort, loader, version }: { query: string, so
       </FadeInStaggerGroup>
     );
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Modrinth API Search Error:", error);
-    }
+    console.error("Modrinth API Search Error:", error);
     return (
       <FadeIn direction="up" delay={0.2}>
         <div className="flex flex-col items-center justify-center py-24 text-center border border-red-500/20 rounded-2xl bg-red-500/5">

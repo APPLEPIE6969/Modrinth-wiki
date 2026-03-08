@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { Github, AlertCircle, Mail, Lock, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -23,12 +23,12 @@ export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const supabase = createClient();
 
-  const isConfigured = isSupabaseConfigured();
-  const supabase = isConfigured ? createClient() : null;
+  const isMissingEnv = process.env.NEXT_PUBLIC_SUPABASE_URL === undefined || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("localhost:54321");
 
   const handleOAuthSignIn = async (provider: 'github' | 'google') => {
-    if (!supabase) return;
+    if (isMissingEnv) return;
     setLoading(provider);
     await supabase.auth.signInWithOAuth({
       provider: provider,
@@ -38,7 +38,7 @@ export default function SignUpPage() {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase) return;
+    if (isMissingEnv) return;
 
     if (!email || !password || !username) {
       setError("Please fill in all fields.");
@@ -83,7 +83,7 @@ export default function SignUpPage() {
           </div>
 
           <div className="px-8 pt-6 pb-2">
-            {!isConfigured ? (
+            {isMissingEnv ? (
               <div className="flex flex-col items-center gap-4 text-center">
                 <div className="rounded-full bg-red-500/10 p-3">
                   <AlertCircle className="h-6 w-6 text-red-500" />

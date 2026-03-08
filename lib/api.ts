@@ -73,9 +73,7 @@ export async function getProjectTeamMembers(teamId: string): Promise<TeamMember[
   try {
     return await fetchLabrinth<TeamMember[]>(`/team/${teamId}/members`);
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`Failed to fetch team members for team ${teamId}:`, error);
-    }
+    console.error(`Failed to fetch team members for team ${teamId}:`, error);
     return [];
   }
 }

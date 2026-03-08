@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -11,16 +11,9 @@ export function AuthButton() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
-  const isConfigured = isSupabaseConfigured();
-  const supabase = isConfigured ? createClient() : null;
+  const supabase = createClient();
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -33,14 +26,13 @@ export function AuthButton() {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, [supabase.auth]);
 
   const handleSignIn = () => {
     router.push("/login");
   };
 
   const handleSignOut = async () => {
-    if (!supabase) return;
     await supabase.auth.signOut();
     router.refresh();
   };
