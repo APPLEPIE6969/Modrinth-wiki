@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { Github, AlertCircle, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -23,12 +23,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
-  const isMissingEnv = process.env.NEXT_PUBLIC_SUPABASE_URL === undefined || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("localhost:54321");
+  const isConfigured = isSupabaseConfigured();
+  const supabase = isConfigured ? createClient() : null;
 
   const handleOAuthSignIn = async (provider: 'github' | 'google') => {
-    if (isMissingEnv) return;
+    if (!supabase) return;
     setLoading(provider);
     await supabase.auth.signInWithOAuth({
       provider: provider,
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isMissingEnv) return;
+    if (!supabase) return;
 
     if (!email || !password) {
       setError("Please fill in all fields.");
@@ -77,7 +77,7 @@ export default function LoginPage() {
           </div>
 
           <div className="px-8 pt-6 pb-2">
-            {isMissingEnv ? (
+            {!isConfigured ? (
               <div className="flex flex-col items-center gap-4 text-center">
                 <div className="rounded-full bg-red-500/10 p-3">
                   <AlertCircle className="h-6 w-6 text-red-500" />
