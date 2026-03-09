@@ -16,20 +16,38 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch favorites
-  const { data: favorites } = await supabase
-    .from("user_favorites")
-    .select("project_slug")
-    .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false });
+  // Fetch data concurrently for better performance
+  const [
+    { data: favorites },
+    { data: wikiPosts },
+    { data: discussions }
+  ] = await Promise.all([
+    supabase
+      .from("user_favorites")
+      .select("project_slug")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("wiki_posts")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("discussions")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+  ]);
 
   // Convert project slugs to search result format for the card component
   const favoriteProjects: SearchResultProject[] = [];
   if (favorites && favorites.length > 0) {
-    for (const fav of favorites) {
+    const projectPromises = favorites.map(async (fav) => {
       try {
         const fullProject = await getProject(fav.project_slug);
-        favoriteProjects.push({
+        return {
           slug: fullProject.slug,
           title: fullProject.title,
           description: fullProject.description,
@@ -49,27 +67,20 @@ export default async function DashboardPage() {
           license: fullProject.license?.name || "Unknown",
           gallery: fullProject.gallery?.map(g => g.url) || [],
           featured_gallery: null,
-        });
+        } as SearchResultProject;
       } catch {
         // Skip projects that fail to load
+        return null;
+      }
+    });
+
+    const results = await Promise.all(projectPromises);
+    for (const result of results) {
+      if (result) {
+        favoriteProjects.push(result);
       }
     }
   }
-
-  // Fetch user posts
-  const { data: wikiPosts } = await supabase
-    .from("wiki_posts")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const { data: discussions } = await supabase
-    .from("discussions")
-    .select("*")
-    .eq("user_id", session.user.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
 
   const userMeta = session.user.user_metadata;
   const username = userMeta?.preferred_username || userMeta?.full_name || session.user.email?.split('@')[0];
