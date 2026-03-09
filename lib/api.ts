@@ -45,7 +45,7 @@ export async function searchProjects(
   query: string = '',
   limit: number = 24,
   offset: number = 0,
-  facets?: string[][],
+  facets?: string,
   index: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated' = 'relevance'
 ): Promise<SearchResponse> {
   const params: Record<string, string> = {

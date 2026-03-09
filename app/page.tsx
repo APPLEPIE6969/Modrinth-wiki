@@ -129,17 +129,17 @@ async function TrendingSection() {
 }
 
 async function ProjectList({ query, sort, loader, version }: { query: string, sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated', loader: string, version: string }) {
-  const facets: string[][] = [];
+  const facetsList: string[] = [`["project_type:mod","project_type:modpack","project_type:resourcepack","project_type:shader","project_type:plugin"]`];
 
   if (loader) {
-    facets.push([`categories:${loader}`]);
+    facetsList.push(`["categories:${loader}"]`);
   }
   if (version) {
-    facets.push([`versions:${version}`]);
+    facetsList.push(`["versions:${version}"]`);
   }
 
   try {
-    const data = await searchProjects(query, 24, 0, facets.length > 0 ? facets : undefined, sort);
+    const data = await searchProjects(query, 24, 0, `[${facetsList.join(",")}]`, sort);
 
     if (!data.hits || data.hits.length === 0) {
       return (
@@ -155,7 +155,7 @@ async function ProjectList({ query, sort, loader, version }: { query: string, so
 
     return (
       <FadeInStaggerGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {data.hits.map((project, index) => (
+        {data.hits.filter((p) => p.project_type !== "server").map((project, index) => (
           <ProjectCard key={project.project_id} project={project} index={index} />
         ))}
       </FadeInStaggerGroup>

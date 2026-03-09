@@ -17,7 +17,6 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Use state instead of defaultValue to guarantee hydration matches and updates are tracked
   const [username, setUsername] = useState(initialUsername);
   const [fullName, setFullName] = useState(initialFullName);
 
@@ -27,7 +26,6 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  // Sync state if server props change
   useEffect(() => {
     setUsername(initialUsername);
     setFullName(initialFullName);
@@ -56,14 +54,9 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
     setError(null);
     setSuccess(false);
 
-    const formData = new FormData();
-    formData.append("username", username);
-    formData.append("fullName", fullName);
+    // Pass the raw form data directly from the event target to avoid duplicate keys
+    const formData = new FormData(e.currentTarget);
     formData.append("currentAvatarUrl", avatarUrl);
-
-    if (fileInputRef.current?.files?.[0]) {
-      formData.append("avatar", fileInputRef.current.files[0]);
-    }
 
     try {
       const result = await updateProfile(formData);
@@ -74,9 +67,14 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
         setSuccess(true);
         if (result.avatarUrl) {
           setAvatarUrl(result.avatarUrl);
-          setAvatarPreview(null); // Clear preview to show live URL
+          setAvatarPreview(null);
         }
-        router.refresh();
+
+        // Hard refresh the router so the layout and nav grab the new session data
+        setTimeout(() => {
+            router.push('/dashboard');
+            router.refresh();
+        }, 1500);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -97,7 +95,7 @@ export function ProfileForm({ initialUsername, initialFullName, initialAvatarUrl
       {success && (
         <div className="bg-[var(--color-brand)]/10 border border-[var(--color-brand)]/20 text-[var(--color-brand)] px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
-          <p>Profile updated successfully!</p>
+          <p>Profile updated successfully! Redirecting...</p>
         </div>
       )}
 
