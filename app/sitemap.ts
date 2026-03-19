@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { searchProjects } from '@/lib/api'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://modrinth-wiki.vercel.app' // You can inject this from env later
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://modrinth-wiki.vercel.app'
 
   try {
     // Fetch the top 100 trending projects for the sitemap
