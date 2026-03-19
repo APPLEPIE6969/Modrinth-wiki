@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   // Convert project slugs to search result format for the card component
   let favoriteProjects: SearchResultProject[] = [];
   if (favorites && favorites.length > 0) {
-    const projectPromises = favorites.map(async (fav) => {
+    const projectPromises = favorites.map(async (fav): Promise<SearchResultProject | null> => {
       try {
         const fullProject = await getProject(fav.project_slug);
         return {
