@@ -59,7 +59,7 @@ export async function searchProjects(
   }
 
   if (facets && facets.length > 0) {
-    params.facets = JSON.stringify(facets);
+    params.facets = facets;
   }
 
   return fetchLabrinth<SearchResponse>('/search', { params });
