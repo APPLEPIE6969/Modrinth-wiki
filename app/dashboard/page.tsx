@@ -24,12 +24,12 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false });
 
   // Convert project slugs to search result format for the card component
-  const favoriteProjects: SearchResultProject[] = [];
+  let favoriteProjects: SearchResultProject[] = [];
   if (favorites && favorites.length > 0) {
-    for (const fav of favorites) {
+    const projectPromises = favorites.map(async (fav) => {
       try {
         const fullProject = await getProject(fav.project_slug);
-        favoriteProjects.push({
+        return {
           slug: fullProject.slug,
           title: fullProject.title,
           description: fullProject.description,
@@ -49,11 +49,14 @@ export default async function DashboardPage() {
           license: fullProject.license?.name || "Unknown",
           gallery: fullProject.gallery?.map(g => g.url) || [],
           featured_gallery: null,
-        });
+        };
       } catch {
-        // Skip projects that fail to load
+        return null;
       }
-    }
+    });
+
+    const results = await Promise.all(projectPromises);
+    favoriteProjects = results.filter((p): p is SearchResultProject => p !== null);
   }
 
   // Fetch user posts
