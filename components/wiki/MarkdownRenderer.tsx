@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
+import { isValidHref } from '@/lib/utils';
 
 interface MarkdownRendererProps {
   content: string;
@@ -21,9 +22,17 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               <img {...props} className="rounded-xl shadow-lg border border-[var(--color-border-subtle)] max-w-full h-auto" loading="lazy" />
             </span>
           ),
-          a: ({node, ...props}) => (
-            <a {...props} target="_blank" rel="noopener noreferrer" />
-          )
+          a: ({node, ...props}) => {
+            const safeHref = isValidHref(props.href) ? props.href : '#';
+            return (
+              <a
+                {...props}
+                href={safeHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            );
+          }
         }}
       >
         {content}

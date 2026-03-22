@@ -1,20 +1,5 @@
-$ next dev
-▲ Next.js 16.1.6 (Turbopack)
-- Local:         http://localhost:3000
-- Network:       http://192.168.0.2:3000
 
-✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
+> temp-project@0.1.0 dev
+> next dev
 
-✓ Ready in 1282ms
-○ Compiling / ...
- GET / 200 in 10.1s (compile: 7.4s, render: 2.6s)
- GET /hero-pattern.svg 404 in 3.0s (compile: 2.8s, render: 243ms)
- GET /?q=sodium 200 in 306ms (compile: 5ms, render: 301ms)
- POST / 303 in 366ms (compile: 15ms, render: 352ms)
- GET /hero-pattern.svg 404 in 103ms (compile: 10ms, render: 93ms)
- GET /?q=sodium 200 in 569ms (compile: 6ms, render: 563ms)
-[?25h
+sh: 1: next: not found
