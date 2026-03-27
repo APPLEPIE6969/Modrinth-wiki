@@ -11,7 +11,7 @@ import Link from "next/link";
 // Define search params type properly for Next.js App Router
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export default async function Home(props: { searchParams: SearchParams }) {
+export default async function Home(props: { searchParams: SearchParams }): Promise<JSX.Element> {
   const searchParams = await props.searchParams;
   const q = typeof searchParams.q === 'string' ? searchParams.q : '';
   const sort = typeof searchParams.sort === 'string' ? searchParams.sort as 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated' : 'relevance';
@@ -119,7 +119,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
   );
 }
 
-async function TrendingSection() {
+async function TrendingSection(): Promise<JSX.Element | null> {
   try {
     const data = await getTrendingProjects(8);
     return <TrendingCarousel projects={data.hits || []} />;
@@ -128,7 +128,7 @@ async function TrendingSection() {
   }
 }
 
-async function ProjectList({ query, sort, loader, version }: { query: string, sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated', loader: string, version: string }) {
+async function ProjectList({ query, sort, loader, version }: { query: string, sort: 'relevance' | 'downloads' | 'follows' | 'newest' | 'updated', loader: string, version: string }): Promise<JSX.Element> {
   const facetsList: string[] = [`["project_type:mod","project_type:modpack","project_type:resourcepack","project_type:shader","project_type:plugin"]`];
 
   if (loader) {
@@ -180,7 +180,7 @@ async function ProjectList({ query, sort, loader, version }: { query: string, so
   }
 }
 
-function ProjectGridSkeleton() {
+function ProjectGridSkeleton(): JSX.Element {
   return (
     <FadeIn direction="up" delay={0.2}>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

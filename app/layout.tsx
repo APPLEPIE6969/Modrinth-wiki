@@ -18,7 +18,7 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>): JSX.Element {
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} min-h-screen flex flex-col font-sans antialiased text-[var(--color-text-primary)] bg-[var(--color-background-base)]`}>

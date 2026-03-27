@@ -34,7 +34,7 @@ export async function generateMetadata(
   }
 }
 
-export default async function ProjectPage(props: { params: Params }) {
+export default async function ProjectPage(props: { params: Params }): Promise<JSX.Element> {
   const params = await props.params;
   let project;
   let isFavorited = false;

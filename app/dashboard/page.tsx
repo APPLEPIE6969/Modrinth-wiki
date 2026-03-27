@@ -8,7 +8,7 @@ import { User, Star, BookOpen, MessageSquare, Settings } from "lucide-react";
 import Link from "next/link";
 import { MarkdownRenderer } from "@/components/wiki/MarkdownRenderer";
 
-export default async function DashboardPage() {
+export default async function DashboardPage(): Promise<JSX.Element> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
 
