@@ -4,7 +4,7 @@ import { getProject } from "@/lib/api";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { FadeIn, FadeInStaggerGroup } from "@/components/ui/FadeIn";
 import { SearchResultProject } from "@/types/modrinth";
-import { User, Star, BookOpen, MessageSquare, Settings } from "lucide-react";
+import { User, Star, BookOpen, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { MarkdownRenderer } from "@/components/wiki/MarkdownRenderer";
 
