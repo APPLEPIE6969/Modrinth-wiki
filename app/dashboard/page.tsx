@@ -42,45 +42,39 @@ export default async function DashboardPage() {
   ]);
 
   // Convert project slugs to search result format for the card component
-  const favoriteProjects: SearchResultProject[] = [];
-  if (favorites && favorites.length > 0) {
-    const projectPromises = favorites.map(async (fav) => {
-      try {
-        const fullProject = await getProject(fav.project_slug);
-        return {
-          slug: fullProject.slug,
-          title: fullProject.title,
-          description: fullProject.description,
-          categories: fullProject.categories,
-          client_side: fullProject.client_side,
-          server_side: fullProject.server_side,
-          project_type: fullProject.project_type,
-          downloads: fullProject.downloads,
-          icon_url: fullProject.icon_url,
-          project_id: fullProject.id,
-          author: fullProject.organization || "Unknown",
-          versions: fullProject.versions,
-          follows: fullProject.followers,
-          date_created: fullProject.published,
-          date_modified: fullProject.updated,
-          latest_version: fullProject.versions[0] || "",
-          license: fullProject.license?.name || "Unknown",
-          gallery: fullProject.gallery?.map(g => g.url) || [],
-          featured_gallery: null,
-        } as SearchResultProject;
-      } catch {
-        // Skip projects that fail to load
-        return null;
-      }
-    });
-
-    const results = await Promise.all(projectPromises);
-    for (const result of results) {
-      if (result) {
-        favoriteProjects.push(result);
-      }
-    }
-  }
+  const favoriteProjects: SearchResultProject[] = favorites && favorites.length > 0
+    ? (await Promise.all(
+        favorites.map(async (fav) => {
+          try {
+            const fullProject = await getProject(fav.project_slug);
+            return {
+              slug: fullProject.slug,
+              title: fullProject.title,
+              description: fullProject.description,
+              categories: fullProject.categories,
+              client_side: fullProject.client_side,
+              server_side: fullProject.server_side,
+              project_type: fullProject.project_type,
+              downloads: fullProject.downloads,
+              icon_url: fullProject.icon_url,
+              project_id: fullProject.id,
+              author: fullProject.organization || "Unknown",
+              versions: fullProject.versions,
+              follows: fullProject.followers,
+              date_created: fullProject.published,
+              date_modified: fullProject.updated,
+              latest_version: fullProject.versions[0] || "",
+              license: fullProject.license?.name || "Unknown",
+              gallery: fullProject.gallery?.map(g => g.url) || [],
+              featured_gallery: null,
+            } as SearchResultProject;
+          } catch {
+            // Skip projects that fail to load
+            return null;
+          }
+        })
+      )).filter((res): res is SearchResultProject => res !== null)
+    : [];
 
   const userMeta = session.user.user_metadata;
   const username = userMeta?.preferred_username || userMeta?.full_name || session.user.email?.split('@')[0];
