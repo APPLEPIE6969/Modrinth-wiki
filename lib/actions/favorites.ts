@@ -12,23 +12,18 @@ export async function toggleFavorite(projectSlug: string) {
     return { error: 'You must be logged in to favorite a project.' };
   }
 
-  // Check if it exists
-  const { data } = await supabase
+  // Delete the favorite if it exists to toggle it off
+  const { data: deletedData } = await supabase
     .from('user_favorites')
-    .select('*')
+    .delete()
     .eq('user_id', session.user.id)
     .eq('project_slug', projectSlug)
-    .single();
+    .select();
 
-  if (data) {
-    // Delete it
-    await supabase
-      .from('user_favorites')
-      .delete()
-      .eq('user_id', session.user.id)
-      .eq('project_slug', projectSlug);
-  } else {
-    // Insert it
+  const wasFavorited = (deletedData?.length ?? 0) > 0;
+
+  if (!wasFavorited) {
+    // If it wasn't deleted, it didn't exist, so we toggle it on by inserting
     await supabase
       .from('user_favorites')
       .insert({
@@ -38,7 +33,7 @@ export async function toggleFavorite(projectSlug: string) {
   }
 
   revalidatePath(`/project/${projectSlug}`);
-  return { success: true, isFavorited: !data };
+  return { success: true, isFavorited: !wasFavorited };
 }
 
 export async function checkIsFavorited(projectSlug: string) {
