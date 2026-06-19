@@ -5,7 +5,7 @@ import { Settings, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { ProfileForm } from "./ProfileForm";
 
-export default async function SettingsPage() {
+export default async function SettingsPage(): Promise<JSX.Element> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
 
